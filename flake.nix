@@ -2,6 +2,7 @@
   inputs = {
     flake-parts.url = "github:hercules-ci/flake-parts";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    naersk.url = "github:nix-community/naersk";
     fenix = {
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -43,8 +44,21 @@
               ])
               fenix.rust-analyzer
             ];
-            RUST_SRC_PATH = pkgs.fenix.stable.rust-src;
+            RUST_SRC_PATH = pkgs.fenix.latest.rust-src;
           };
+
+          packages =
+            let
+              naersk = pkgs.callPackage inputs.naersk { };
+            in
+            rec {
+              default = naersk.buildPackage {
+                src = ./.;
+              };
+              dev = default // {
+                release = false;
+              };
+            };
         };
     };
 }
