@@ -12,9 +12,9 @@ pub fn find_pack_format() -> Result<i32, Box<dyn std::error::Error>> {
 		.get(1)
 		.unwrap()
 		.as_str();
-	let field_name = Regex::new("RESOURCE_PACK_FORMAT_MAJOR -> ([a-z]+)")?
+	let field_name = Regex::new("RESOURCE_PACK_FORMAT(?:_MAJOR)? -> ([a-z]+)")?
 		.captures(&mappings_str)
-		.expect("couldn't find SharedConstants class")
+		.expect("couldn't find RESOURCE_PACK_FORMAT_MAJOR field")
 		.get(1)
 		.unwrap()
 		.as_str();
