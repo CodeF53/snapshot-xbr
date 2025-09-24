@@ -1,10 +1,6 @@
 mod mojang_api;
 mod process;
-use process::process;
+mod find_pack_format;
 
 fn main() {
-    let in_image = image::open("crafting_table_front.png").expect("you should exist bud");
-    let out_image = process(in_image, true, false);
-
-    out_image.save("scaled.png").unwrap();
 }
