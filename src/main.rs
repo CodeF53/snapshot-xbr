@@ -1,3 +1,4 @@
+mod mojang_api;
 mod process;
 use process::process;
 
