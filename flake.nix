@@ -43,6 +43,9 @@
                 "rustfmt"
               ])
               fenix.rust-analyzer
+              # needed for rust-analyzer when dealing with the crates
+              pkg-config
+              openssl
             ];
             RUST_SRC_PATH = pkgs.fenix.latest.rust-src;
           };
