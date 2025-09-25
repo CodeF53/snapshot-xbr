@@ -7,6 +7,7 @@ mod mojang_api;
 mod process;
 
 #[derive(clap::Parser)]
+#[command(arg_required_else_help(true))]
 struct Args {
 	/// minecraft version to upscale ex: 1.21.8, 25w37a, 25w14craftmine
 	version: String,
@@ -16,7 +17,7 @@ struct Args {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let args = Args::parse();
-	
+
 	println!("fetching client.jar from mojang");
 	mojang_api::get_client_files(&args.version).await.unwrap();
 
