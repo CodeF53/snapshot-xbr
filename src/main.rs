@@ -17,9 +17,11 @@ async fn main() {
 	//    out_img = oxipng(out_img)
 	//    save_to ./out/{version_id}/entry.path
 
-	// copy static files to ./out/{version_id}
-	// in copied pack.mcmeta change pack_format from -1 to find_pack_format::find_pack_format().unwrap()
-	let pack_format = find_pack_format::find_pack_format().unwrap();
+	// write pack.mcmeta with correct pack format and pack.png to output zip
+	let pack_png = include_bytes!("./static/pack.png");
+	let mut pack_meta = include_str!("./static/pack.mcmeta");
+	let pack_format = find_pack_format::find_pack_format().expect("failed to find pack format");
+	pack_meta = &pack_meta.replace("PACK_FORMAT", &pack_format.to_string());
 
 	// zip everything
 
