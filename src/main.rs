@@ -1,3 +1,4 @@
+use clap::Parser;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::io::{Read, Write};
 
@@ -5,15 +6,25 @@ mod find_pack_format;
 mod mojang_api;
 mod process;
 
+#[derive(clap::Parser)]
+struct Args {
+	/// minecraft version to upscale ex: 1.21.8, 25w37a, 25w14craftmine
+	version: String,
+}
+
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-	let version_id = "1.21.6";
-	mojang_api::get_client_files(version_id).await.unwrap();
+	let args = Args::parse();
+	
+	println!("fetching client.jar from mojang");
+	mojang_api::get_client_files(&args.version).await.unwrap();
 
+	println!("creating output zip");
 	if !std::fs::exists("./output/")? {
 		std::fs::create_dir("./output")?;
 	}
-	let zip_file = std::fs::File::create(format!("./output/{}.zip", version_id))
+	let zip_file = std::fs::File::create(format!("./output/{}.zip", args.version))
 		.expect("failed to create output zip");
 	let mut zip = zip::ZipWriter::new(zip_file);
 	let zip_options = zip::write::SimpleFileOptions::default()
@@ -59,6 +70,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 		zip.add_directory_from_path(path, zip_options)?;
 	}
 
+	println!("processing textures");
 	wanted_paths
 		.iter()
 		.filter(|path| !path.ends_with('/'))
@@ -86,12 +98,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 		.collect::<Vec<_>>()
 		.into_iter()
 		.for_each(|file| {
-			println!("{}", file.0);
 			zip.start_file(file.0, zip_options).unwrap();
 			zip.write_all(&file.1).unwrap();
 		});
 
 	zip.finish()?;
 	std::fs::remove_dir_all("./tmp").expect("failed to clean up minecraft assets");
+	println!("done");
 	Ok(())
 }

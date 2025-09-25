@@ -306,6 +306,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e2134bb3ea021b78629caa971416385309e0131b351b25e01dc16fb54e1b5fae"
 dependencies = [
  "clap_builder",
+ "clap_derive",
 ]
 
 [[package]]
@@ -319,6 +320,18 @@ dependencies = [
  "clap_lex",
  "strsim",
  "terminal_size",
+]
+
+[[package]]
+name = "clap_derive"
+version = "4.5.47"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bbfd7eae0b0f1a6e63d4b13c9c478de77c2eb546fba158ad50b4203dc24b9f9c"
+dependencies = [
+ "heck",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -2109,6 +2122,7 @@ version = "0.1.0"
 dependencies = [
  "bytes 1.10.1",
  "cafebabe",
+ "clap",
  "fs",
  "futures 0.3.31",
  "image",

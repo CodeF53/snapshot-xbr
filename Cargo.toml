@@ -19,3 +19,4 @@ zip = { version = "5.1.1", default-features = false, features = ["deflate"] }
 futures = "0.3.31"
 oxipng = "9.1.5"
 rayon = "1.11.0"
+clap = { version = "4.5.48", features = ["derive"] }
