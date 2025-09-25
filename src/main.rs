@@ -1,4 +1,5 @@
 use std::io::{Read, Write};
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 mod find_pack_format;
 mod mojang_api;
@@ -64,6 +65,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 			file_zip.read_to_end(&mut file_bytes).unwrap();
 			(path, file_bytes)
 		})
+		.collect::<Vec<_>>()
+		.into_par_iter()
 		.map(|file| if file.0.ends_with("mcmeta") { file } else {
 			let tile = ["/block/", "/optifine/", "/painting/"].iter().any(|f| file.0.contains(f));
 			let relayer = ["/model/", "/entity/"].iter().any(|f| file.0.contains(f));
@@ -71,6 +74,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 			let proccessed_data = process::process(file.1, tile, relayer);
 			(file.0, proccessed_data)
 		} )
+		.collect::<Vec<_>>()
+		.into_iter()
 		.for_each(|file| {
 			println!("{}", file.0);
 			zip.start_file(file.0, zip_options).unwrap();
