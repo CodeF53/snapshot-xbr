@@ -2113,6 +2113,7 @@ dependencies = [
  "futures 0.3.31",
  "image",
  "oxipng",
+ "rayon",
  "regex",
  "reqwest",
  "serde",
