@@ -1,7 +1,9 @@
 use image::GenericImageView;
 use oxipng::optimize_from_memory;
 
-pub fn process(img: image::DynamicImage, tile: bool, relayer: bool) -> Vec<u8> {
+pub fn process(img_bytes: Vec<u8>, tile: bool, relayer: bool) -> Vec<u8> {
+	let img = image::load_from_memory(&img_bytes).expect("failed to parse image data");
+
 	let cull = !img.pixels().any(|pixel| (1..255).contains(&pixel.2.0[3]));
 
 	let mut scaled = if tile {
