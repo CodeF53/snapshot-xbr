@@ -1,5 +1,5 @@
-use std::io::{Read, Write};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use std::io::{Read, Write};
 
 mod find_pack_format;
 mod mojang_api;
@@ -53,11 +53,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 		.collect::<Vec<String>>();
 
 	for path in &wanted_paths {
-		if !path.ends_with('/') { continue; }
+		if !path.ends_with('/') {
+			continue;
+		}
 		zip.add_directory_from_path(path, zip_options)?;
 	}
 
-	wanted_paths.iter()
+	wanted_paths
+		.iter()
 		.filter(|path| !path.ends_with('/'))
 		.map(|path| {
 			let mut file_zip = client_jar.by_name(path).unwrap();
@@ -67,13 +70,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 		})
 		.collect::<Vec<_>>()
 		.into_par_iter()
-		.map(|file| if file.0.ends_with("mcmeta") { file } else {
-			let tile = ["/block/", "/optifine/", "/painting/"].iter().any(|f| file.0.contains(f));
-			let relayer = ["/model/", "/entity/"].iter().any(|f| file.0.contains(f));
+		.map(|file| {
+			if file.0.ends_with("mcmeta") {
+				file
+			} else {
+				let tile = ["/block/", "/optifine/", "/painting/"]
+					.iter()
+					.any(|f| file.0.contains(f));
+				let relayer = ["/model/", "/entity/"].iter().any(|f| file.0.contains(f));
 
-			let proccessed_data = process::process(file.1, tile, relayer);
-			(file.0, proccessed_data)
-		} )
+				let proccessed_data = process::process(file.1, tile, relayer);
+				(file.0, proccessed_data)
+			}
+		})
 		.collect::<Vec<_>>()
 		.into_iter()
 		.for_each(|file| {
