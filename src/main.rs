@@ -14,14 +14,13 @@ struct Args {
 }
 
 #[derive(Deserialize)]
-struct Packers {
-	pack_version: PackVersion,
+struct PackVersion {
+	pack_version: ResourceVersion,
 }
 
 #[derive(Deserialize)]
 #[serde(untagged)]
-#[serde(rename_all = "snake_case")]
-enum PackVersion {
+enum ResourceVersion {
 	MinorMajorResource {
 		resource_major: u8,
 		resource_minor: u8,
@@ -30,7 +29,7 @@ enum PackVersion {
 		resource: u8,
 	},
 }
-impl PackVersion {
+impl ResourceVersion {
 	fn to_string(self) -> String {
 		match self {
 			Self::MinorMajorResource {
@@ -68,7 +67,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 		.by_name("version.json")
 		.expect("client jar should contain version.json");
 
-	let version_inf: Packers = serde_json::from_reader(jar_version_inf).unwrap();
+	let version_inf: PackVersion = serde_json::from_reader(jar_version_inf).unwrap();
 	let pack_meta =
 		&include_str!("./static/pack.mcmeta").replace("PACK_FORMAT", &version_inf.pack_version.to_string());
 	zip.start_file("pack.mcmeta", zip_options)?;
