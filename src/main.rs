@@ -1,8 +1,8 @@
 use clap::Parser;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use serde::Deserialize;
 use std::io::{Read, Write};
 
-mod find_pack_format;
 mod mojang_api;
 mod process;
 
@@ -13,6 +13,34 @@ struct Args {
 	version: String,
 }
 
+#[derive(Deserialize)]
+struct Packers {
+	pack_version: PackVersion,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+#[serde(rename_all = "snake_case")]
+enum PackVersion {
+	MinorMajorResource {
+		resource_major: u8,
+		resource_minor: u8,
+	},
+	Resource {
+		resource: u8,
+	},
+}
+impl PackVersion {
+	fn to_string(self) -> String {
+		match self {
+			Self::MinorMajorResource {
+				resource_major,
+				resource_minor,
+			} => format!("{resource_major}.{resource_minor}"),
+			Self::Resource { resource } => resource.to_string(),
+		}
+	}
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -20,6 +48,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 	println!("fetching client.jar from mojang");
 	mojang_api::get_client_files(&args.version).await.unwrap();
+	let mut client_jar = zip::ZipArchive::new(
+		std::fs::File::open("./tmp/client.jar").expect("client.jar should exist at this point"),
+	)
+	.expect("jar file is valid zip archive");
 
 	println!("creating output zip");
 	if !std::fs::exists("./output/")? {
@@ -32,9 +64,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 		.compression_method(zip::CompressionMethod::Deflated);
 
 	// write pack.mcmeta with correct pack format and pack.png to output zip
-	let pack_format = find_pack_format::find_pack_format().expect("failed to find pack format");
+	let jar_version_inf = client_jar
+		.by_name("version.json")
+		.expect("client jar should contain version.json");
+
+	let version_inf: Packers = serde_json::from_reader(jar_version_inf).unwrap();
 	let pack_meta =
-		&include_str!("./static/pack.mcmeta").replace("PACK_FORMAT", &pack_format.to_string());
+		&include_str!("./static/pack.mcmeta").replace("PACK_FORMAT", &version_inf.pack_version.to_string());
 	zip.start_file("pack.mcmeta", zip_options)?;
 	zip.write_all(pack_meta.to_string().as_bytes())?;
 
@@ -43,11 +79,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	zip.write_all(pack_png)?;
 
 	//
-	let mut client_jar = zip::ZipArchive::new(
-		std::fs::File::open("./tmp/client.jar").expect("client.jar should exist at this point"),
-	)
-	.expect("jar file is valid zip archive");
-
 	let wanted_paths = client_jar
 		.file_names()
 		.filter(|p| p.starts_with("assets/minecraft/textures/"))
