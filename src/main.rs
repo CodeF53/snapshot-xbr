@@ -41,16 +41,11 @@ impl ResourceVersion {
 	}
 }
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let args = Args::parse();
 
 	println!("fetching client.jar from mojang");
-	mojang_api::get_client_files(&args.version).await.unwrap();
-	let mut client_jar = zip::ZipArchive::new(
-		std::fs::File::open("./tmp/client.jar").expect("client.jar should exist at this point"),
-	)
-	.expect("jar file is valid zip archive");
+	let mut client_jar = mojang_api::get_client_files(&args.version).expect("jar file is valid zip archive");
 
 	println!("creating output zip");
 	if !std::fs::exists("./output/")? {
@@ -134,7 +129,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 		});
 
 	zip.finish()?;
-	std::fs::remove_dir_all("./tmp").expect("failed to clean up minecraft assets");
 	println!("done");
 	Ok(())
 }
