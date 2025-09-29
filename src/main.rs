@@ -21,9 +21,8 @@ struct PackVersion {
 #[derive(Deserialize)]
 #[serde(untagged)]
 enum ResourceVersion {
-	MinorMajorResource {
+	MajorResource {
 		resource_major: u8,
-		resource_minor: u8,
 	},
 	Resource {
 		resource: u8,
@@ -32,10 +31,7 @@ enum ResourceVersion {
 impl ResourceVersion {
 	fn to_string(self) -> String {
 		match self {
-			Self::MinorMajorResource {
-				resource_major,
-				resource_minor,
-			} => format!("{resource_major}.{resource_minor}"),
+			Self::MajorResource { resource_major } => resource_major.to_string(),
 			Self::Resource { resource } => resource.to_string(),
 		}
 	}
