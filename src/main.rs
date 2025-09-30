@@ -47,7 +47,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	if !std::fs::exists("./output/")? {
 		std::fs::create_dir("./output")?;
 	}
-	let zip_file = std::fs::File::create(format!("./output/{}.zip", args.version))
+	let zip_file = std::fs::File::create(format!("./output/SnapshotXBR-{}.zip", args.version))
 		.expect("failed to create output zip");
 	let mut zip = zip::ZipWriter::new(zip_file);
 	let zip_options = zip::write::SimpleFileOptions::default()
