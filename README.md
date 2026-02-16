@@ -5,9 +5,17 @@ Automatically generated resource packs for Minecraft using the [xBRZ](https://so
 
 Designed to be used alongside [VanillaXBR](https://modrinth.com/resourcepack/vanillaxbr), as an underlay to provide new textures before Misterk7_- gets to them
 
-## This will be a script that
-1. checks for new snapshots
-2. download new snapshot if there is one
-3. scales its textures using xBRZ 
-4. optimizes resulting texures using oxipng
-5. uploads the resulting pack to modrinth
+## Usage:
+```
+Usage: snapshot-xbr [OPTIONS] <VERSION>
+
+Arguments:
+  <VERSION>  minecraft version to upscale ex: 1.21.8, 25w37a, 25w14craftmine, 26.1-snapshot-4, 26.1
+
+Options:
+  -p, --publish  automatically publish to modrinth (requires MODRINTH_KEY and MODRINTH_PROJECT_ID)
+  -w, --webhook  send modrinth release to discord webhook (requires DISCORD_WEBHOOK)
+  -h, --help     Print help
+```
+
+Only thing left to do with this project is to make a thing that listens for new minecraft releases and automatically runs with `snapshot-xbr <VERSION> --publish --webhook`
