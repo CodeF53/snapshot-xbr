@@ -1,5 +1,6 @@
 use clap::Parser;
 
+mod modrinth_api;
 mod mojang_api;
 mod package_zip;
 mod process;
@@ -9,6 +10,9 @@ mod process;
 struct Args {
 	/// minecraft version to upscale ex: 1.21.8, 25w37a, 25w14craftmine, 26.1-snapshot-4, 26.1
 	version: String,
+	/// automatically publish to modrinth (requires MODRINTH_KEY and MODRINTH_PROJECT_ID)
+	#[arg(short, long)]
+	publish: bool,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -27,6 +31,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 		println!("processing done, output available at {output_path}");
 	}
 
+	if args.publish {
+		dotenv::dotenv().ok();
+
+		println!("publishing to modrinth");
+		let release_url =
+			modrinth_api::publish(&output_path, &args.version).expect("publishing to succeed");
+		println!("{}", release_url);
+	}
 
 	Ok(())
 }
