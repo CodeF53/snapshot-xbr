@@ -1,5 +1,6 @@
 use clap::Parser;
 
+mod discord_webhook;
 mod modrinth_api;
 mod mojang_api;
 mod package_zip;
@@ -13,6 +14,9 @@ struct Args {
 	/// automatically publish to modrinth (requires MODRINTH_KEY and MODRINTH_PROJECT_ID)
 	#[arg(short, long)]
 	publish: bool,
+	/// send modrinth release to discord webhook (requires DISCORD_WEBHOOK)
+	#[arg(short, long)]
+	webhook: bool,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -38,6 +42,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 		let release_url =
 			modrinth_api::publish(&output_path, &args.version).expect("publishing to succeed");
 		println!("{}", release_url);
+
+		if args.webhook {
+			println!("publishing to discord webhook");
+			discord_webhook::post(&release_url).expect("webhook to succeed");
+		}
 	}
 
 	Ok(())
