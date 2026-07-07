@@ -1,5 +1,5 @@
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
-use serde::{Deserialize};
+use serde::Deserialize;
 use std::io::{Read, Write};
 
 #[derive(Deserialize)]
@@ -89,7 +89,7 @@ pub fn package_zip(
 		.collect::<Vec<_>>()
 		.into_par_iter()
 		.map(|file| {
-			if file.0.ends_with("mcmeta") {
+			if !file.0.ends_with("png") {
 				file
 			} else {
 				let tile = ["/block/", "/optifine/", "/painting/"]
